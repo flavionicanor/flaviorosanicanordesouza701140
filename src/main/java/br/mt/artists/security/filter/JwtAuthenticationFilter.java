@@ -36,15 +36,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // 🔴 IGNORAR PREFLIGHT
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        try{
-            //String token = authHeader.substring(7);
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
             String token = authHeader.replace("Bearer", "").trim();
             String username = jwtService.extractUsername(token);
 
@@ -56,28 +61,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (jwtService.isTokenValid(token, userDetails)) {
 
-                    UsernamePasswordAuthenticationToken authentication =
+                    UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,
                                     userDetails.getAuthorities()
                             );
 
-                    authentication.setDetails(
+                    authToken.setDetails(
                             new WebAuthenticationDetailsSource()
                                     .buildDetails(request)
                     );
 
                     SecurityContextHolder.getContext()
-                            .setAuthentication(authentication);
+                            .setAuthentication(authToken);
                 }
             }
 
             filterChain.doFilter(request, response);
-        }
-        catch (Exception ex) {
+
+        } catch (io.jsonwebtoken.JwtException ex) {
+
+            System.out.println(ex.getMessage());
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
+
             response.getWriter().write("""
             {
               "error": "Unauthorized",
@@ -86,4 +95,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         """);
         }
     }
+
 }
