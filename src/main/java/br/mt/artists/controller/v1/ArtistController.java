@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("api/v1/artists")
+@RequestMapping("/api/v1/artists")
 public class ArtistController {
     private final ArtistService artisService;
 
@@ -21,7 +21,11 @@ public class ArtistController {
     }
 
     @GetMapping
-    public Page<Artist> list(@RequestParam(required = false) String name, Pageable pageable) {
+    public Page<Artist> list(
+            @RequestParam(name = "name", required = false, defaultValue = "") String name,
+            Pageable pageable
+    ) {
         return artisService.search(name == null ? "" : name, pageable);
     }
+
 }

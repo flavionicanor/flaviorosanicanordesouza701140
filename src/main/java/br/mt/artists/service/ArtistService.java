@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class ArtistService {
 
-    private final ArtistRepository artistiRepository;
+    private final ArtistRepository artistRepository;
 
 
-    public ArtistService(ArtistRepository artistiRepository) {
-        this.artistiRepository = artistiRepository;
+    public ArtistService(ArtistRepository artistRepository) {
+        this.artistRepository = artistRepository;
     }
 
     public Page<Artist> search(String name, Pageable pageable) {
-        return artistiRepository.findByNameContainingIgnoreCase(name, pageable);
+        return artistRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 }
