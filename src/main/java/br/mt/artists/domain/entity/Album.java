@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -28,9 +30,21 @@ public class Album {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @ElementCollection
+    @CollectionTable(
+            name = "album_cover",
+            joinColumns = @JoinColumn(name = "album_id")
+    )
+    @Column(name = "object_name")
+    private List<String> covers = new ArrayList<>();
+
     @PrePersist
     void onCreate(){
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void addCover(String objectName){
+        this.covers.add(objectName);
     }
 
 }
