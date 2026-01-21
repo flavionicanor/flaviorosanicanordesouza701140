@@ -1,6 +1,8 @@
 package br.mt.artists.controller.v1;
 
+import br.mt.artists.domain.dto.AlbumCoverResponseDTO;
 import br.mt.artists.service.AlbumCoverService;
+import br.mt.artists.service.AlbumService;
 import br.mt.artists.service.StorageService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,11 @@ import java.util.UUID;
 public class AlbumCoverController {
 
     private final AlbumCoverService albumCoverService;
+    private final AlbumService albumService;
 
-    public AlbumCoverController(AlbumCoverService albumCoverService) {
+    public AlbumCoverController(AlbumCoverService albumCoverService, AlbumService albumService) {
         this.albumCoverService = albumCoverService;
+        this.albumService = albumService;
     }
 
     @PostMapping(value = "/{id}/covers")
@@ -27,8 +31,18 @@ public class AlbumCoverController {
             @PathVariable("id") Long id,
             @RequestParam("files") List<MultipartFile> files
     ) {
-        return ResponseEntity.ok(albumCoverService.uploadCovers(id, files));
+        return ResponseEntity.ok(albumService.uploadCovers(id, files));
     }
+
+    @GetMapping(value = "/{id}/covers")
+    public List<AlbumCoverResponseDTO> list(
+            @PathVariable("id") Long id
+    ) {
+        System.out.println("chegou aqui");
+        return albumCoverService.listByAlbum(id);
+    }
+
+
 
 
 }

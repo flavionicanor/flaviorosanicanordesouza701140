@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class StorageService {
@@ -63,5 +64,21 @@ public class StorageService {
                     MakeBucketArgs.builder().bucket(bucket).build());
         }
 
+    }
+
+    public String getPresignedUrl(String objectName){
+        try{
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.POST)
+                            .bucket(bucket)
+                            .object(objectName)
+                            .expiry(10, TimeUnit.MINUTES)
+                            .build()
+            );
+
+        }catch (Exception e){
+            throw new RuntimeException("Error generating presigned URL", e);
+        }
     }
 }
