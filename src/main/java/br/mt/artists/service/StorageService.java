@@ -34,7 +34,7 @@ public class StorageService {
             return objectName;
 
         } catch (Exception e) {
-            throw new RuntimeException("Error uploading file", e);
+            throw new RuntimeException("Erro ao realizar upload da capa do álbum");
         }
     }
 

@@ -30,6 +30,10 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
+        return generateAccessToken(userDetails);
+    }
+
+    public String generateAccessToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
@@ -37,6 +41,27 @@ public class JwtService {
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + (expiration * 10))
+                )
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateTokenFromUsername(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
 
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();

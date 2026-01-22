@@ -1,10 +1,12 @@
 package br.mt.artists.security.filter;
 
+import br.mt.artists.exception.InvalidTokenException;
 import br.mt.artists.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -93,6 +95,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
               "message": "Invalid or expired token"
             }
         """);
+            throw new RuntimeException("Token inválido ou expirado");
         }
     }
 

@@ -1,8 +1,12 @@
 package br.mt.artists.controller.v1;
 
-import br.mt.artists.domain.dto.AuthResponseDTO;
-import br.mt.artists.domain.dto.LoginRequestDTO;
+import br.mt.artists.domain.dto.request.RefreshTokenRequestDTO;
+import br.mt.artists.domain.dto.request.TokenResponseDTO;
+import br.mt.artists.domain.dto.response.AuthResponseDTO;
+import br.mt.artists.domain.dto.response.LoginRequestDTO;
+import br.mt.artists.exception.BusinessException;
 import br.mt.artists.service.JwtService;
+import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,4 +45,17 @@ public class AuthController {
 
         return new AuthResponseDTO(token);
     }
+
+    @PostMapping("/refresh")
+    public AuthResponseDTO refresh(@RequestHeader("Authorization") String authorization) {
+
+        String refreshToken = authorization.replace("Bearer", "").trim();
+
+        String username = jwtService.extractUsername(refreshToken);
+
+        String newAccessToken = jwtService.generateTokenFromUsername(username);
+
+        return new AuthResponseDTO(newAccessToken);
+    }
+
 }
