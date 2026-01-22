@@ -1,6 +1,6 @@
 package br.mt.artists.domain.dto.response;
 
-public class LoginRequestDTO {
+public class LoginRequestDTO_old {
 
     private String username;
     private String password;

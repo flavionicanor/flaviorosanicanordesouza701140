@@ -10,5 +10,4 @@ public class ArtistsApiApplication {
 		SpringApplication.run(ArtistsApiApplication.class, args);
 	}
 
-
 }

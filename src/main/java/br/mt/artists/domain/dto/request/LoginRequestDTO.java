@@ -1,13 +1,16 @@
 package br.mt.artists.domain.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class LoginRequestDTO {
 
     @NotBlank(message = "Usuário é obrigatório")
+    @Size(min = 3, max = 100, message = "Usuário deve ter entre 3 e 100 caracteres")
     private String username;
 
     @NotBlank(message = "Senha é obrigatória")
+    @Size(min = 6, max = 100, message = "Senha deve ter no mínimo 6 caracteres")
     private String password;
 
     public String getUsername() {

@@ -1,10 +1,7 @@
 package br.mt.artists.controller.v1;
 
-import br.mt.artists.domain.dto.request.RefreshTokenRequestDTO;
-import br.mt.artists.domain.dto.request.TokenResponseDTO;
+import br.mt.artists.domain.dto.request.LoginRequestDTO;
 import br.mt.artists.domain.dto.response.AuthResponseDTO;
-import br.mt.artists.domain.dto.response.LoginRequestDTO;
-import br.mt.artists.exception.BusinessException;
 import br.mt.artists.service.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@RequestBody LoginRequestDTO request) {
+    public AuthResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
 
         Authentication authentication =
                 authenticationManager.authenticate(
