@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = authHeader.replace("Bearer", "").trim();
+
             String username = jwtService.extractUsername(token);
 
             if (username != null &&
@@ -86,25 +88,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext()
                             .setAuthentication(authToken);
+                } else {
+                    throw new AccessDeniedException("Token inválido ou expirado");
                 }
             }
 
             filterChain.doFilter(request, response);
 
         } catch (io.jsonwebtoken.JwtException ex) {
-
-            System.out.println(ex.getMessage());
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-
-            response.getWriter().write("""
-            {
-              "error": "Unauthorized",
-              "message": "Invalid or expired token"
-            }
-        """);
-            throw new RuntimeException("Token inválido ou expirado");
+            SecurityContextHolder.clearContext();
+            throw new AccessDeniedException("Token inválido ou expirado");
         }
     }
 

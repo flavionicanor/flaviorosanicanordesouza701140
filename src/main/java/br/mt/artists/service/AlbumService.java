@@ -10,7 +10,10 @@ import br.mt.artists.exception.ResourceNotFoundException;
 import br.mt.artists.repository.AlbumCoverRepository;
 import br.mt.artists.repository.AlbumRepository;
 import br.mt.artists.repository.ArtistRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,20 +24,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AlbumService {
 
     private final AlbumRepository albumRepository;
     private final StorageService storageService;
     private final ArtistRepository artistRepository;
     private final AlbumCoverRepository albumCoverRepository;
-
-
-    public AlbumService(AlbumRepository albumRepository, StorageService storageService, ArtistRepository artistRepository, AlbumCoverRepository albumCoverRepository) {
-        this.albumRepository = albumRepository;
-        this.storageService = storageService;
-        this.artistRepository = artistRepository;
-        this.albumCoverRepository = albumCoverRepository;
-    }
 
     @Transactional
     public List<String> uploadCovers(Long albumId, List<MultipartFile> files){
@@ -72,55 +68,29 @@ public class AlbumService {
         return "albuns/" +albumId + "/" + UUID.randomUUID() + "_" + originalFilename;
     }
 
-    public Album create(String title, Long artistId){
-        Artist artist = artistRepository.findById(artistId).orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado com o ID informado"));
+    @Transactional
+    public AlbumResponseDTO create(String title, Long artistId) {
+
+        Artist artist = artistRepository.findById(artistId)
+                .orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado"));
 
         Album album = new Album();
         album.setTitle(title);
         album.getArtists().add(artist);
-        artist.getAlbums().add(album);
 
-        return albumRepository.save(album);
+        Album saved = albumRepository.save(album);
 
+        return mapToDTO(saved);
     }
 
-    public Album update(Long id, String title){
-        Album album = albumRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Album não encontrado"));
+    private AlbumResponseDTO mapToDTO(Album album) {
 
-        album.setTitle(title);
-        return albumRepository.save(album);
-
-    }
-
-    public List<Album> findAll() {
-        return albumRepository.findAll();
-    }
-
-    public Album findById(Long id) {
-        return albumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Album não encontrado com id " + id
-                ));
-    }
-
-    @Transactional()
-    public AlbumResponseDTO getById(Long id) {
-        Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Album não encontrado"));
-
-            Set<ArtistResponseDTO> artists = album.getArtists()
-                .stream()
-                .map(artist -> new ArtistResponseDTO(
-                        artist.getId(),
-                        artist.getName(),
-                        artist.getCreatedAt()))
+        Set<ArtistResponseDTO> artists = album.getArtists().stream()
+                .map(ArtistResponseDTO::fromEntity)
                 .collect(Collectors.toSet());
 
-
-        List<String> covers = albumCoverRepository
-                .findByAlbumId(album.getId())
-                .stream()
-                .map(AlbumCover::getObjectName)
+        List<String> covers = album.getCovers().stream()
+                .map(storageService::generatePresignedUrl)
                 .toList();
 
         return new AlbumResponseDTO(
@@ -131,6 +101,94 @@ public class AlbumService {
                 album.getCreatedAt()
         );
     }
+
+    @Transactional
+    public AlbumResponseDTO update(Long id, String title) {
+
+        Album album = albumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado"));
+
+        album.setTitle(title);
+
+        Album updated = albumRepository.save(album);
+
+        return mapToDTO(updated);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AlbumResponseDTO> findAll(Pageable pageable) {
+
+        return albumRepository.findAll(pageable)
+                .map(album -> {
+
+                    List<String> covers = album.getCovers().stream()
+                            .map(storageService::generatePresignedUrl)
+                            .toList();
+
+                    Set<ArtistResponseDTO> artists = album.getArtists().stream()
+                            .map(ArtistResponseDTO::fromEntity)
+                            .collect(Collectors.toSet());
+
+                    return new AlbumResponseDTO(
+                            album.getId(),
+                            album.getTitle(),
+                            artists,
+                            covers,
+                            album.getCreatedAt()
+                    );
+                });
+    }
+
+
+    private AlbumResponseDTO mapToResponse(Album album) {
+
+        Set<ArtistResponseDTO> artists = album.getArtists().stream()
+                .map(ArtistResponseDTO::fromEntity)
+                .collect(Collectors.toSet());
+
+        List<String> covers = album.getCovers().stream()
+                .map(storageService::generatePresignedUrl)
+                .toList();
+
+        return new AlbumResponseDTO(
+                album.getId(),
+                album.getTitle(),
+                artists,
+                covers,
+                album.getCreatedAt()
+        );
+    }
+
+    public Album findById(Long id) {
+        return albumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Album não encontrado com id " + id
+                ));
+    }
+
+    @Transactional(readOnly = true)
+    public AlbumResponseDTO getById(Long id) {
+
+        Album album = albumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado"));
+
+        Set<ArtistResponseDTO> artists = album.getArtists().stream()
+                .map(ArtistResponseDTO::fromEntity)
+                .collect(Collectors.toSet());
+
+        List<String> covers = album.getCovers().stream()
+                .map(storageService::generatePresignedUrl)
+                .toList();
+
+        return new AlbumResponseDTO(
+                album.getId(),
+                album.getTitle(),
+                artists,
+                covers,
+                album.getCreatedAt()
+        );
+    }
+
 
 
 }

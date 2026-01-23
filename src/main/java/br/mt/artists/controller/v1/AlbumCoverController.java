@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/albums")
 //@RequestMapping("/api/v1/albums/{id}/covers")
@@ -27,11 +29,6 @@ public class AlbumCoverController {
 
     private final AlbumCoverService albumCoverService;
     private final AlbumService albumService;
-
-    public AlbumCoverController(AlbumCoverService albumCoverService, AlbumService albumService) {
-        this.albumCoverService = albumCoverService;
-        this.albumService = albumService;
-    }
 
     @PostMapping(value = "/{id}/covers",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

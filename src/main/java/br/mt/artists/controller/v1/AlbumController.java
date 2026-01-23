@@ -6,25 +6,25 @@ import br.mt.artists.domain.dto.response.AlbumResponseDTO;
 import br.mt.artists.domain.entity.Album;
 import br.mt.artists.service.AlbumService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/albums")
 public class AlbumController {
 
     private final AlbumService albumService;
 
-    public AlbumController(AlbumService albumService) {
-        this.albumService = albumService;
-    }
-
     // POST
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Album create(
+    public AlbumResponseDTO create(
             @Valid @RequestBody CreateAlbumRequestDTO request
     ) {
         return albumService.create(
@@ -33,10 +33,9 @@ public class AlbumController {
         );
     }
 
-    // GET ALL
     @GetMapping
-    public List<Album> findAll() {
-        return albumService.findAll();
+    public Page<AlbumResponseDTO> findAll(Pageable pageable) {
+        return albumService.findAll(pageable);
     }
 
     // GET BY ID
@@ -49,8 +48,9 @@ public class AlbumController {
 
     // PUT
     @PutMapping("/{id}")
-    public Album update(@PathVariable("id") Long id,
-                        @Valid @RequestBody UpdateAlbumRequestDTO requestDTO){
+    public AlbumResponseDTO update(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody UpdateAlbumRequestDTO requestDTO){
 
         return albumService.update(id, requestDTO.getTitle());
 

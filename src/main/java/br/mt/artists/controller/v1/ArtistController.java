@@ -12,15 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/artists")
 public class ArtistController {
     private final ArtistService artistService;
-
-    public ArtistController(ArtistService artistService) {
-        this.artistService = artistService;
-    }
 
     @GetMapping
     public Page<ArtistResponseDTO> list(

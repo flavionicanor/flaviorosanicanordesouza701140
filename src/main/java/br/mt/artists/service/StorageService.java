@@ -49,7 +49,7 @@ public class StorageService {
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Error generating presigned URL", e);
+            throw new RuntimeException("Erro ao gerar URL pré-assinada", e);
         }
 
     }
