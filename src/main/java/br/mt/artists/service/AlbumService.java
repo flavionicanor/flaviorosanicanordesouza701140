@@ -11,7 +11,6 @@ import br.mt.artists.repository.AlbumCoverRepository;
 import br.mt.artists.repository.AlbumRepository;
 import br.mt.artists.repository.ArtistRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -100,21 +99,21 @@ public class AlbumService {
     public Album findById(Long id) {
         return albumRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Álbum não encontrado com id " + id
+                        "Album não encontrado com id " + id
                 ));
     }
 
     @Transactional()
     public AlbumResponseDTO getById(Long id) {
         Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Album não encontrado"));
 
             Set<ArtistResponseDTO> artists = album.getArtists()
                 .stream()
                 .map(artist -> new ArtistResponseDTO(
                         artist.getId(),
-                        artist.getName()
-                ))
+                        artist.getName(),
+                        artist.getCreatedAt()))
                 .collect(Collectors.toSet());
 
 

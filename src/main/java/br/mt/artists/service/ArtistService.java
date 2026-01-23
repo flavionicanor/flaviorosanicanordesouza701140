@@ -1,9 +1,9 @@
 package br.mt.artists.service;
 
+import br.mt.artists.domain.dto.response.ArtistResponseDTO;
 import br.mt.artists.domain.entity.Artist;
 import br.mt.artists.exception.ResourceNotFoundException;
 import br.mt.artists.repository.ArtistRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -20,32 +20,35 @@ public class ArtistService {
         this.artistRepository = artistRepository;
     }
 
-    public Page<Artist> search(String name, Pageable pageable) {
+    public Page<ArtistResponseDTO> search(String name, Pageable pageable) {
         return artistRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
     @Transactional
-    public Artist create(String name) {
+    public ArtistResponseDTO create(String name) {
         Artist artist = new Artist();
         artist.setName(name);
-        return artistRepository.save(artist);
+        return ArtistResponseDTO.fromEntity(artistRepository.save(artist));
     }
 
 
     @Transactional(readOnly = true)
-    public Artist findById(Long id) {
-        return artistRepository.findById(id)
+    public ArtistResponseDTO findById(Long id) {
+        Artist artist = artistRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Artista não encontrado")
                 );
+
+        return ArtistResponseDTO.fromEntity(artist);
     }
 
     @Transactional
-    public Artist update(Long id, String name) {
+    public ArtistResponseDTO update(Long id, String name) {
         Artist artist = artistRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Artista não encontrado"));
 
         artist.setName(name);
-        return artistRepository.save(artist);
+
+        return ArtistResponseDTO.fromEntity(artistRepository.save(artist));
     }
 
 }

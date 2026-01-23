@@ -1,5 +1,6 @@
 package br.mt.artists.repository;
 
+import br.mt.artists.domain.dto.response.ArtistResponseDTO;
 import br.mt.artists.domain.entity.AlbumCover;
 import br.mt.artists.domain.entity.Artist;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,6 @@ import java.util.List;
 
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
-    Page<Artist> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<ArtistResponseDTO> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
 }
