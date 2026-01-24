@@ -31,6 +31,8 @@ public class AlbumService {
     private final StorageService storageService;
     private final ArtistRepository artistRepository;
     private final AlbumCoverRepository albumCoverRepository;
+    private final AlbumNotificationService albumNotificationService;
+
 
     @Transactional
     public List<String> uploadCovers(Long albumId, List<MultipartFile> files){
@@ -79,6 +81,9 @@ public class AlbumService {
         album.getArtists().add(artist);
 
         Album saved = albumRepository.save(album);
+
+        // Dispara evento websocket
+        albumNotificationService.notifyAlbumCreated(saved);
 
         return mapToDTO(saved);
     }
