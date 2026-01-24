@@ -19,7 +19,9 @@ CREATE TABLE artist_album (
 );
 
 CREATE TABLE regional (
-    id INTEGER PRIMARY KEY,
+    id INTEGER NOT NULL,
     nome VARCHAR(200) NOT NULL,
-    ativo BOOLEAN NOT NULL
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id, created_at)
 );

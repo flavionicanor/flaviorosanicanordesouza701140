@@ -111,7 +111,7 @@ public class AlbumService {
     public AlbumResponseDTO update(Long id, String title) {
 
         Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Album não encontrado"));
 
         album.setTitle(title);
 
@@ -175,7 +175,7 @@ public class AlbumService {
     public AlbumResponseDTO getById(Long id) {
 
         Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Álbum não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Album não encontrado"));
 
         Set<ArtistResponseDTO> artists = album.getArtists().stream()
                 .map(ArtistResponseDTO::fromEntity)

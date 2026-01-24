@@ -1,18 +1,16 @@
 package br.mt.artists.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "regional")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Regional {
 
     @Id
@@ -24,8 +22,8 @@ public class Regional {
     @Column(nullable = false)
     private Boolean ativo;
 
-    public Integer getId() {
-        return id;
-    }
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
 
 }
