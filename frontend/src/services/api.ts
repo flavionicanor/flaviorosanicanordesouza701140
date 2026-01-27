@@ -7,6 +7,7 @@ export const api = axios.create({
   },
 });
 
+// Interceptor de request (envia token)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
 
@@ -16,3 +17,18 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+// Interceptor de request (envia token)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status == 401) {
+      //token invalido ou expirado
+      localStorage.removeItem("accessToken");
+
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  },
+);

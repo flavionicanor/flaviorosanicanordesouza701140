@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { api } from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
+  const navigate = useNavigate();
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,13 +24,14 @@ export function LoginPage() {
     }
 
     //chamar a api
-    console.log("Login válido: ", { username, password });
+    //console.log("Login válido: ", { username, password });
 
     api
       .post("/auth/login", { username, password })
       .then((response) => {
-        console.log("Token recebido: ", response.data);
-        localStorage.setItem("accessToken", response.data.accessToken);
+        //console.log("Token recebido: ", response.data.token);
+        localStorage.setItem("accessToken", response.data.token);
+        navigate("/");
       })
       .catch(() => setError("Usuário ou senha inválidos"));
   }

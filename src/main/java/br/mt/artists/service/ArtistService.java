@@ -20,8 +20,9 @@ public class ArtistService {
         this.artistRepository = artistRepository;
     }
 
+    @Transactional(readOnly = true)
     public Page<ArtistResponseDTO> search(String name, Pageable pageable) {
-        return artistRepository.findByNameContainingIgnoreCase(name, pageable);
+        return artistRepository.findAllWithAlbumCount(name, pageable);
     }
 
     @Transactional

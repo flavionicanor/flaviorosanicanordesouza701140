@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { LoginPage } from "../features/auth/LoginPage";
-import Artists from "./pages/Artists";
+import { LoginPage } from "../pages/auth/LoginPage";
+import Artists from "../pages/Artists";
 import { PrivateRoute } from "../routes/PrivateRoute";
 
 export function App() {
