@@ -121,10 +121,20 @@ public class AlbumService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AlbumResponseDTO> findAll(Pageable pageable) {
+    public Page<AlbumResponseDTO> findAll(Long artistId,Pageable pageable) {
 
-        return albumRepository.findAll(pageable)
-                .map(album -> {
+        Page<Album> page;
+
+        if (artistId != null) {
+            page = albumRepository.findAllByArtistId(artistId, pageable);
+        } else {
+            page = albumRepository.findAll(pageable);
+        }
+
+
+
+
+        return page.map(album -> {
 
                     List<String> covers = album.getCovers().stream()
                             .map(storageService::generatePresignedUrl)

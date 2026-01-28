@@ -34,8 +34,10 @@ public class AlbumController {
     }
 
     @GetMapping
-    public Page<AlbumResponseDTO> findAll(Pageable pageable) {
-        return albumService.findAll(pageable);
+    public Page<AlbumResponseDTO> findAll(
+            @RequestParam(name = "artistId", required = false) Long artistId,
+            Pageable pageable) {
+        return albumService.findAll(artistId, pageable);
     }
 
     // GET BY ID

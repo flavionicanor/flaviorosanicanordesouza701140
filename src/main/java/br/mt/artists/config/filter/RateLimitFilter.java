@@ -1,6 +1,6 @@
-package br.mt.artists.config.filter;
+package br.mt.artists.security.filter;
 
-import com.google.common.util.concurrent.RateLimiter;
+import io.github.bucket4j.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,12 +10,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    // 10 requisições por minuto = ~0.166 req/seg
-    private final RateLimiter rateLimiter = RateLimiter.create(10.0 / 60.0);
+    private static final int REQUESTS_PER_MINUTE = 40; // 10 edital
+
+    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+
+    private Bucket resolveBucket(String key) {
+        return buckets.computeIfAbsent(key, k -> {
+            Bandwidth limit = Bandwidth.classic(
+                    REQUESTS_PER_MINUTE,
+                    Refill.intervally(REQUESTS_PER_MINUTE, Duration.ofMinutes(1))
+            );
+            return Bucket.builder()
+                    .addLimit(limit)
+                    .build();
+        });
+    }
 
     @Override
     protected void doFilterInternal(
@@ -26,19 +42,38 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        if (path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")
-                || path.startsWith("/webjars")) {
+        // Rotas que NÃO devem consumir rate limit
+        if (
+                path.startsWith("/api/v1/auth") ||
+                        path.startsWith("/swagger") ||
+                        path.startsWith("/v3/api-docs") ||
+                        path.startsWith("/actuator") ||
+                        request.getMethod().equalsIgnoreCase("OPTIONS")
+        ) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (rateLimiter.tryAcquire()) {
+        // Chave do rate limit (JWT se existir, senão IP)
+        String authHeader = request.getHeader("Authorization");
+        String key = (authHeader != null && !authHeader.isBlank())
+                ? authHeader
+                : request.getRemoteAddr();
+
+        Bucket bucket = resolveBucket(key);
+
+        if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.getWriter().write("Rate limit exceeded");
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                  "status": 429,
+                  "error": "Too Many Requests",
+                  "message": "Limite de requisições excedido. Tente novamente em alguns instantes."
+                }
+                """);
         }
     }
 }
-

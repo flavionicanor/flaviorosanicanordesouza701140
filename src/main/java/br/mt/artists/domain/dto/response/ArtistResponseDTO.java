@@ -11,7 +11,7 @@ public record ArtistResponseDTO(
         return new ArtistResponseDTO(
                 artist.getId(),
                 artist.getName(),
-                0L
+                artist.getAlbums() == null ? 0L : (long)artist.getAlbums().size()
         );
     }
 }
