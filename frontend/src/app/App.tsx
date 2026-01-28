@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LoginPage } from "../pages/auth/LoginPage";
 import Artists from "../pages/Artists";
 import { PrivateRoute } from "../routes/PrivateRoute";
+import ArtistDetail from "../pages/ArtistDetail";
 
 export function App() {
   return (
@@ -14,6 +15,15 @@ export function App() {
           element={
             <PrivateRoute>
               <Artists />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/artists/:id"
+          element={
+            <PrivateRoute>
+              <ArtistDetail />
             </PrivateRoute>
           }
         />

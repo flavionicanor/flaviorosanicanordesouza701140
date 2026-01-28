@@ -21,3 +21,7 @@ export function getArtists(name: string, page: number, sort: "asc" | "desc") {
     },
   });
 }
+
+export function getArtistsId(artistId: string) {
+  return api.get(`/albums?artistId=${artistId}`);
+}

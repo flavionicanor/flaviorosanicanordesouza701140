@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getArtists, type Artist } from "../services/artistsService";
+import { Link } from "react-router-dom";
 
 export default function Artists() {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -70,15 +71,19 @@ export default function Artists() {
         {/* Listagem */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {artists.map((artist) => (
-            <div
-              key={artist.id}
-              className="p-4 border rounded shadow hover:shadow-lg transition"
-            >
-              <h2 className="font-semibold">{artist.name}</h2>
-              <p className="text-sm text-gray-600">
-                Álbuns: {artist.albumsCount}
-              </p>
-            </div>
+            <Link to={`/artists/${artist.id}`}>
+              <div className="cursor-pointer hover:shadow-lg transition">
+                <div
+                  key={artist.id}
+                  className="p-4 border rounded shadow hover:shadow-lg transition"
+                >
+                  <h2 className="font-semibold">{artist.name}</h2>
+                  <p className="text-sm text-gray-600">
+                    Álbuns: {artist.albumsCount}
+                  </p>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
 
