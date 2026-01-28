@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../services/api";
 import type { Album } from "../types/Album";
+import AlbumForm from "../components/AlbumForm";
+import AlbumCoverUpload from "../components/AlbumCoverUpload";
 
 export default function ArtistDetail() {
   const { id } = useParams();
@@ -9,15 +11,19 @@ export default function ArtistDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading) return;
+    loadAlbums();
+  }, [id]);
 
-    api
-      .get(`/albums`, {
+  const loadAlbums = async () => {
+    setLoading(true);
+
+    await api
+      .get("/albums", {
         params: { artistId: id },
       })
       .then((response) => setAlbums(response.data.content))
       .finally(() => setLoading(false));
-  }, [id]);
+  };
 
   if (loading) {
     return <p className="text-center mt-10">Carregando...</p>;
@@ -32,7 +38,6 @@ export default function ArtistDetail() {
     );
   }
 
-  console.log(albums);
   const artist = albums[0].artists[0];
 
   return (
@@ -41,6 +46,11 @@ export default function ArtistDetail() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{artist.name}</h1>
         <p className="text-gray-600">{albums.length} álbum(ns)</p>
+      </div>
+
+      {/* Formulário de novo álbum */}
+      <div className="my-6">
+        <AlbumForm artistId={Number(id)} onCreated={loadAlbums} />
       </div>
 
       {/* Lista de álbuns */}
@@ -58,9 +68,12 @@ export default function ArtistDetail() {
               />
             ) : (
               <div className="h-48 flex items-center justify-center bg-gray-100 rounded text-gray-500">
-                Sem capa
+                Nenhum capa cadastrada
               </div>
             )}
+
+            {/* Upload de capas */}
+            <AlbumCoverUpload albumId={album.id} onSuccess={loadAlbums} />
           </div>
         ))}
       </div>
