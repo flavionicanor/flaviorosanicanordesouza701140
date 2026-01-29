@@ -6,6 +6,7 @@ import br.mt.artists.exception.ResourceNotFoundException;
 import br.mt.artists.repository.ArtistRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +22,14 @@ public class ArtistService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ArtistResponseDTO> search(String name, Pageable pageable) {
-        return artistRepository.findAllWithAlbumCount(name, pageable);
+    public Page<ArtistResponseDTO> search(String name, String direction, Pageable pageable) {
+
+        if("desc".equalsIgnoreCase(direction)){
+            return artistRepository.findAllWithAlbumCountDesc(name, pageable);
+        }
+
+        return artistRepository
+                .findAllWithAlbumCountAsc(name, pageable);
     }
 
     @Transactional

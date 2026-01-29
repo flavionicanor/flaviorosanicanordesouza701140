@@ -21,10 +21,27 @@ public interface ArtistRepository extends JpaRepository<Artist, Long> {
     from Artist a
     left join a.albums al
     where (:name = '' or lower(a.name) like lower(concat('%', :name, '%')))
-    group by a.id, a.name
+    group by a.id, a.name order by a.name asc
     """)
-    Page<ArtistResponseDTO> findAllWithAlbumCount(
+    Page<ArtistResponseDTO> findAllWithAlbumCountAsc(
             @Param("name") String name,
             Pageable pageable
     );
+
+    @Query("""
+    select new br.mt.artists.domain.dto.response.ArtistResponseDTO(
+        a.id,
+        a.name,
+        count(al) as albumsCount
+    )
+    from Artist a
+    left join a.albums al
+    where (:name = '' or lower(a.name) like lower(concat('%', :name, '%')))
+    group by a.id, a.name order by a.name desc 
+    """)
+    Page<ArtistResponseDTO> findAllWithAlbumCountDesc(
+            @Param("name") String name,
+            Pageable pageable
+    );
+
 }

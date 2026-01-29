@@ -21,9 +21,10 @@ public class ArtistController {
     @GetMapping
     public Page<ArtistResponseDTO> list(
             @RequestParam(name = "name", required = false, defaultValue = "") String name,
+            @RequestParam(name = "sort", required = false, defaultValue = "asc") String sort,
             Pageable pageable
     ) {
-        return artistService.search(name, pageable);
+        return artistService.search(name, sort, pageable);
     }
 
     @GetMapping("/{id}")

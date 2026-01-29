@@ -15,6 +15,7 @@ export function getArtists(name: string, page: number, sort: "asc" | "desc") {
   return api.get<ArtistsResponse>("/artists", {
     params: {
       name,
+      sort,
       page,
       size: 10,
       sorte: `name,${sort}`,
