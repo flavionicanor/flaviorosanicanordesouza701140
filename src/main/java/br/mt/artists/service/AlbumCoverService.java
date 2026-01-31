@@ -22,7 +22,7 @@ public class AlbumCoverService {
         return albumCoverRepository.findByAlbumId(albumId)
                 .stream()
                 .map(cover -> new AlbumCoverResponseDTO(
-                        cover.getId(),storageService.getPresignedUrl(cover.getObjectName())
+                        cover.getId(),storageService.generatePresignedUrl(cover.getObjectName())
                 ))
                 .toList();
     }

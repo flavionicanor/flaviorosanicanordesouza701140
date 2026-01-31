@@ -2,6 +2,7 @@ package br.mt.artists.service;
 
 import io.minio.*;
 import io.minio.http.Method;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,14 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class StorageService {
     private final MinioClient minioClient;
+    private final MinioClient minioClientPublic;
     private final String bucket;
 
-    public StorageService(MinioClient minioClient, @Value("${minio.bucket}") String bucket){
+    public StorageService(@Qualifier("minioClient") MinioClient minioClient,
+                          @Qualifier("minioClientPublic") MinioClient minioClientPublic,
+                          @Value("${minio.bucket}") String bucket){
         this.minioClient = minioClient;
+        this.minioClientPublic = minioClientPublic;
         this.bucket = bucket;
     }
 
@@ -39,19 +44,23 @@ public class StorageService {
     }
 
     public String generatePresignedUrl(String objectName){
-        try{
-            return minioClient.getPresignedObjectUrl(
+        try {
+            // USA O CLIENTE PÚBLICO para gerar a URL
+            String url = minioClientPublic.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .bucket(bucket)
                             .object(objectName)
                             .method(Method.GET)
-                            .expiry(30 * 60) // 30 minutes
+                            .expiry(30*60) // 30 minutos
                             .build()
             );
+
+            // Adiciona timestamp para evitar cache
+            return url + "&t=" + System.currentTimeMillis();
+
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar URL pré-assinada", e);
         }
-
     }
 
     private void ensureBucketExists() throws Exception {
@@ -63,12 +72,11 @@ public class StorageService {
             minioClient.makeBucket(
                     MakeBucketArgs.builder().bucket(bucket).build());
         }
-
     }
 
-    public String getPresignedUrl(String objectName){
+    public String getPresignedUrlZ(String objectName){
         try{
-            return minioClient.getPresignedObjectUrl(
+            return minioClientPublic.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.POST)
                             .bucket(bucket)

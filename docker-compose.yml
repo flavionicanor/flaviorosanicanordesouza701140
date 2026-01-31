@@ -12,20 +12,24 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   minio:
     image: minio/minio:latest
     container_name: minio
-    command: server /data --console-address ":9001"
+    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
     restart: always
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
-      - "${MINIO_PORT}:9000"
-      - "${MINIO_CONSOLE_PORT}:9001"
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
+    networks:
+      - app-network
 
   api:
     build: .
@@ -37,7 +41,26 @@ services:
     depends_on:
       - postgres
       - minio
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: artists-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
   minio_data:
+
+networks:
+  app-network:
+    driver: bridge

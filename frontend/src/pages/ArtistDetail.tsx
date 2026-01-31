@@ -31,7 +31,7 @@ export default function ArtistDetail() {
     return <p className="text-center mt-10">Carregando...</p>;
   }
 
-  const artist = albums.length > 0 ? albums[0].artists[0] : [];
+  const artist = albums.length > 0 ? albums[0].artists[0] : null;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
