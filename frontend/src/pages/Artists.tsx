@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getArtists, type Artist } from "../services/artistsService";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import ArtistModal from "../components/ArtistModal";
 
 export default function Artists() {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -10,10 +11,13 @@ export default function Artists() {
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [newArtistName, setNewArtistName] = useState("");
 
   const navigate = useNavigate();
 
+  // Controle do modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Edição de artista
   const [editingArtist, setEditingArtist] = useState<{
     id: number;
     name: string;
@@ -53,46 +57,26 @@ export default function Artists() {
     setEditingArtist(null);
     setName("");
 
-    loadArtists(); // reaproveita o que você já tem
+    loadArtists();
   }
 
-  const handleCreateArtist = async () => {
-    if (!newArtistName.trim()) return;
-
-    await api.post("/artists", { name: newArtistName });
-
-    setNewArtistName("");
-    loadArtists(); // recarrega lista
-  };
-
-  if (loading) return <p className="text-center">Carregando...</p>;
+  if (loading) return <p className="text-center mt-10">Carregando...</p>;
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <div className="text-3xl font=bold text-blue-600 mb-6">
-          Cadastro de Artista
-        </div>
-
-        <div className="mb-6 flex gap-2">
-          <input
-            type="text"
-            placeholder="Novo artista"
-            value={newArtistName}
-            onChange={(e) => setNewArtistName(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          />
+        {/* Cabeçalho com botão de novo artista */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-blue-600">
+            Gerenciar Artistas
+          </h1>
 
           <button
-            onClick={handleCreateArtist}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
-            Cadastrar
+            + Novo Artista
           </button>
-        </div>
-
-        <div className="text-3xl font=bold text-blue-600 mb-6">
-          Listagem dos Artistas
         </div>
 
         {/* Filtros */}
@@ -100,13 +84,13 @@ export default function Artists() {
           <input
             type="text"
             placeholder="Buscar por nome"
-            className="flex-1 px-4 py-2 border rounded"
+            className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
           <select
-            className="px-4 py-2  border rounded"
+            className="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={sort}
             onChange={(e) => setSort((e.target.value as "asc") || "desc")}
           >
@@ -122,28 +106,28 @@ export default function Artists() {
           </button>
         </div>
 
-        {/* Listagem */}
+        {/* Formulário de edição (quando clica em Editar) */}
         {editingArtist && (
-          <div className="mt-6 p-4 border rounded bg-gray-50">
-            <h3 className="font-semibold mb-2">Editar Artista</h3>
+          <div className="mt-6 p-4 border rounded bg-white shadow-sm mb-6">
+            <h3 className="font-semibold mb-3">Editar Artista</h3>
 
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border p-2 w-full mb-3"
+              className="border p-2 w-full mb-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             <div className="flex gap-2">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 onClick={handleUpdateArtist}
               >
                 Salvar
               </button>
 
               <button
-                className="bg-gray-300 px-4 py-2 rounded"
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
                 onClick={() => setEditingArtist(null)}
               >
                 Cancelar
@@ -152,11 +136,13 @@ export default function Artists() {
           </div>
         )}
 
+        {/* Listagem */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {artists.map((artist) => (
             <div
+              key={artist.id}
               onClick={() => navigate(`/artists/${artist.id}`)}
-              className="bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-50"
+              className="bg-white p-4 rounded shadow cursor-pointer hover:shadow-lg transition"
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -174,36 +160,60 @@ export default function Artists() {
                   }}
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  Editar
+                  ✏️ Editar
                 </button>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Mensagem quando não há artistas */}
+        {artists.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-500 text-lg mb-4">
+              Nenhum artista encontrado.
+            </p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Cadastrar primeiro artista
+            </button>
+          </div>
+        )}
+
         {/* Paginação */}
-        <div className="flex justify-between items-center mt-6">
-          <button
-            disabled={page === 0}
-            onClick={() => setPage(page - 1)}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Anterior
-          </button>
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center mt-6">
+            <button
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 hover:bg-gray-400"
+            >
+              ← Anterior
+            </button>
 
-          <span>
-            Página {page + 1} de {totalPages}
-          </span>
+            <span className="text-gray-700">
+              Página {page + 1} de {totalPages}
+            </span>
 
-          <button
-            disabled={page + 1 >= totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Próxima
-          </button>
-        </div>
+            <button
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage(page + 1)}
+              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 hover:bg-gray-400"
+            >
+              Próxima →
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Modal de cadastro */}
+      <ArtistModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={loadArtists}
+      />
     </div>
   );
 }

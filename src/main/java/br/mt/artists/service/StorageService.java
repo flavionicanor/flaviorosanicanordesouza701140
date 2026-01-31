@@ -55,8 +55,7 @@ public class StorageService {
                             .build()
             );
 
-            // Adiciona timestamp para evitar cache
-            return url + "&t=" + System.currentTimeMillis();
+            return url;
 
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar URL pré-assinada", e);
