@@ -1,10 +1,11 @@
-🎵 Artists API – Projeto Concurso Java
+Artists API – Projeto Full Stack (Java + React)
 
-Este projeto foi desenvolvido como parte de um processo seletivo, com o objetivo de demonstrar experiência em Java + Spring Boot, construção de APIs REST, segurança, integração com serviços externos e organização de um projeto pronto para evoluir.
+Este projeto foi desenvolvido como parte de um processo seletivo, com o objetivo de demonstrar conhecimento em Java com Spring Boot, construção de APIs REST seguras, integração com serviços externos, Docker, e um front-end em React consumindo a API.
 
-A aplicação gerencia artistas, álbuns e capas de álbuns, com upload de imagens no MinIO, autenticação via JWT, versionamento de endpoints e execução completa via Docker.
+A aplicação permite gerenciar artistas, álbuns e capas de álbuns, com upload de imagens no MinIO, autenticação JWT, versionamento de endpoints e execução completa via Docker Compose.
 
-🛠 Tecnologias utilizadas
+🛠 Tecnologias Utilizadas
+Back-end
 
 Java 17
 
@@ -20,17 +21,31 @@ PostgreSQL
 
 Flyway (migrations)
 
-MinIO (armazenamento S3)
+MinIO (API compatível com S3)
 
 Swagger / OpenAPI
 
+Spring Actuator (Health, Liveness, Readiness)
+
+WebSocket
+
+Rate Limit
+
 Docker & Docker Compose
 
-WebSocket (notificação de novos álbuns)
+Front-end
 
-Spring Actuator (Health / Liveness / Readiness)
+React + TypeScript
 
-📦 Arquitetura geral
+Vite
+
+Axios
+
+TailwindCSS
+
+React Router
+
+📦 Arquitetura Geral
 
 API REST desenvolvida em Spring Boot
 
@@ -38,15 +53,17 @@ Banco de dados PostgreSQL
 
 Armazenamento de imagens no MinIO
 
+Front-end em React consumindo a API
+
 Containers orquestrados via docker-compose
 
-Autenticação JWT com expiração e refresh
+Autenticação JWT com expiração e renovação
 
 Relacionamento N:N entre Artistas e Álbuns
 
 Endpoints versionados (/api/v1)
 
-▶️ Como executar o projeto
+▶️ Como Executar o Projeto
 Pré-requisitos
 
 Docker
@@ -54,15 +71,20 @@ Docker
 Docker Compose
 
 Passos
+
+Na raiz do projeto:
+
 docker compose down -v
 docker compose up --build
 
 
-Após subir os containers, os serviços estarão disponíveis em:
+Após subir os containers:
 
 API: http://localhost:8080
 
 Swagger: http://localhost:8080/swagger-ui
+
+Front-end: http://localhost:3000
 
 MinIO Console: http://localhost:9001
 
@@ -74,13 +96,13 @@ Senha: minioadmin
 
 🔐 Autenticação (JWT)
 
-A API utiliza autenticação baseada em JWT.
+A aplicação utiliza JWT para proteger os endpoints.
 
 Login
 
 POST /api/v1/auth/login
 
-Exemplo de payload:
+Payload de exemplo:
 
 {
 "username": "admin",
@@ -94,82 +116,86 @@ Resposta:
 "accessToken": "token..."
 }
 
-Refresh Token
 
-POST /api/v1/auth/refresh
+O accessToken deve ser enviado no header:
+
+Authorization: Bearer {token}
+
+
+O refresh token não foi exposto nesta versão do front-end, pois o edital não exige obrigatoriamente o fluxo completo no cliente. A API já está preparada para evolução.
 
 📚 Documentação da API (Swagger)
 
-A documentação interativa dos endpoints pode ser acessada em:
+A documentação completa dos endpoints está disponível em:
 
 👉 http://localhost:8080/swagger-ui
 
-O Swagger já está configurado com o botão Authorize, permitindo informar o token JWT e testar os endpoints protegidos diretamente pela interface.
+O Swagger já está configurado com botão Authorize, permitindo informar o token JWT e testar os endpoints protegidos.
 
-🎤 Endpoints principais
-🎵 Artistas
+🎤 Endpoints Principais
+Artistas
 
 GET /api/v1/artists
-Lista artistas com paginação, filtro por nome e ordenação.
+Lista artistas (paginação, filtro por nome e ordenação ASC/DESC).
 
 GET /api/v1/artists/{id}
 Busca artista por ID.
 
 POST /api/v1/artists
-Cria um novo artista.
+Cria novo artista.
 
 PUT /api/v1/artists/{id}
-Atualiza um artista existente.
+Atualiza artista.
 
-💿 Álbuns
+Álbuns
 
 GET /api/v1/albums
-Lista álbuns com paginação.
+Lista álbuns (com paginação e filtro por artista).
 
 GET /api/v1/albums/{id}
 Busca álbum por ID.
 
 POST /api/v1/albums
-Cria um álbum e associa a um ou mais artistas.
+Cria álbum e associa a um artista.
 
 PUT /api/v1/albums/{id}
-Atualiza os dados de um álbum.
+Atualiza álbum.
 
-🖼 Capas de Álbum (Upload)
+Capas de Álbum (Upload)
 
 POST /api/v1/albums/{id}/covers
 
-Permite o upload de uma ou mais imagens de capa para um álbum.
+Permite upload de uma ou mais imagens para o álbum.
 
 As imagens são:
 
 Armazenadas no MinIO
 
-Vinculadas ao álbum no banco de dados
+Vinculadas ao álbum no banco
 
-Recuperadas por meio de URLs pré-assinadas
+Recuperadas via URL pré-assinada (presigned URL)
 
 🖼 Presigned URL (MinIO)
 
-As capas dos álbuns são retornadas como links temporários, gerados via presigned URL do MinIO, com expiração de 30 minutos.
+As capas dos álbuns são retornadas como links temporários, com expiração de 30 minutos, garantindo segurança no acesso aos arquivos.
 
-Isso garante que os arquivos fiquem protegidos e não expostos publicamente.
+Esse mecanismo evita expor o bucket publicamente e é compatível com cenários de produção.
 
 🌍 Regionais
 
-Foi implementado o endpoint de Regionais, conforme solicitado no edital, incluindo:
+Foi implementado o endpoint de Regionais, conforme solicitado no edital:
 
-Importação de dados a partir de um serviço externo
+Importação de dados externos
 
 Persistência em tabela própria
 
 Controle de ativo/inativo
 
-Atualização incremental conforme mudanças nos dados
+Sincronização incremental (inserção, inativação e versionamento)
 
 ❤️ Health, Liveness e Readiness
 
-A aplicação disponibiliza endpoints de monitoramento via Spring Actuator:
+Disponíveis via Spring Actuator:
 
 /actuator/health
 
@@ -177,38 +203,58 @@ A aplicação disponibiliza endpoints de monitoramento via Spring Actuator:
 
 /actuator/health/readiness
 
-Esses endpoints permitem verificar se:
+Esses endpoints permitem verificar:
 
-A aplicação está ativa
+Se a aplicação está viva
 
-Está pronta para receber tráfego
+Se está pronta para receber tráfego
 
-Dependências como banco de dados estão funcionando corretamente
+Se dependências como banco estão funcionando
 
 🚦 Rate Limit
 
-Foi implementado rate limit de 10 requisições por minuto por usuário, evitando abuso da API e simulando um cenário mais próximo de produção.
+Foi implementado rate limit de requisições por usuário, evitando abuso da API e atendendo aos requisitos do edital.
 
 🧪 Testes
 
-Testes unitários não foram implementados nesta versão devido ao tempo disponível para o desafio.
+Testes unitários não foram implementados nesta versão devido ao tempo disponível.
 
-Essa foi uma decisão consciente, priorizando a entrega completa dos requisitos funcionais descritos no edital, e está documentada de forma transparente.
+Essa decisão foi consciente e documentada, priorizando a entrega completa dos requisitos funcionais e arquiteturais solicitados.
 
-📌 Observações finais
+🖥 Front-end (React)
+
+O front-end foi desenvolvido em React + TypeScript, consumindo a API.
+
+Funcionalidades implementadas:
+
+Tela de login com JWT
+
+Listagem de artistas com paginação e ordenação
+
+Detalhe do artista com listagem de álbuns e capas
+
+Cadastro e edição de artistas
+
+Cadastro e edição de álbuns
+
+Upload de capas de álbuns
+
+Layout responsivo com TailwindCSS
+
+O front foi integrado ao docker-compose, rodando como container junto com API, banco e MinIO.
+
+📌 Observações Finais
 
 O projeto foi desenvolvido pensando em legibilidade, organização e facilidade de evolução.
 
-As decisões técnicas foram feitas buscando simplicidade e aderência ao edital.
+Commits foram feitos de forma incremental.
 
-Os commits foram realizados de forma incremental, acompanhando a evolução do projeto.
-
-Pontos não aprofundados foram escolhas conscientes para priorizar os itens mais relevantes.
+Onde algo não foi aprofundado, a decisão foi consciente e priorizada conforme o edital.
 
 👨‍💻 Autor
 
 Flávio Rosa Nicanor de Souza
-Projeto desenvolvido para processo seletivo – Backend Java.
+Projeto desenvolvido para processo seletivo – Java / Backend / Full Stack.
 
-Repositório do projeto:
-👉 https://github.com/flavionicanor/flaviorosanicanordesouza701140
+🔗 Repositório:
+https://github.com/flavionicanor/flaviorosanicanordesouza701140
