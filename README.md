@@ -45,16 +45,21 @@ Passos
 Na raiz do projeto:
 
 docker compose down -v
+
 docker compose up --build
 
 Após subir os containers:
 
 API: http://localhost:8080
+
 Swagger: http://localhost:8080/swagger-ui/index.html
+
 Front-end: http://localhost:3000
+
 MinIO Console: http://localhost:9001
 
 Credenciais do MinIO:
+
 Usuário: minioadmin
 Senha: minioadmin
 
@@ -86,6 +91,7 @@ O refresh token não foi exposto nesta versão do front-end, pois o edital não 
 A documentação completa dos endpoints está disponível em:
 
 👉 http://localhost:8080/swagger-ui/index.html
+
 O Swagger já está configurado com botão Authorize, permitindo informar o token JWT e testar os endpoints protegidos.
 
 🎤 Endpoints Principais
